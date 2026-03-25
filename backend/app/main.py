@@ -1,4 +1,7 @@
+import os
+import tempfile
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from src.detection.detect import detect_fish
 
 app = FastAPI()
 
@@ -10,7 +13,7 @@ def read_root():
 
 @app.post("/analyze")
 async def analyze_image(file: UploadFile = File(...)):
-#checking if file is supported
+    #checking if file is supported
     allowed_types = ["image/jpeg", "image/png", "image/jpg"]
     if file.content_type not in allowed_types:
         raise HTTPException(
@@ -24,16 +27,43 @@ async def analyze_image(file: UploadFile = File(...)):
     except Exception:
         raise HTTPException(status_code=500, detail="Error reading file.")
     
-#JSON Response
+    temp_image_path = None #creating temp file for detect.py to read
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+            temp_file.write(image_bytes)
+            temp_image_path = temp_file.name
+
+        #calls ML pipeline
+        raw_detections = detect_fish(image_path=temp_image_path)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
+    
+    finally:
+        #delete the temp file
+        if temp_image_path and os.path.exists(temp_image_path): 
+            os.remove(temp_image_path)
+            
+    #formatted output for the frontedn   
+    total_fish = len(raw_detections)
+    formatted_detections = []
+    species_counts = {}
+
+    for det in raw_detections:
+        #getting data from dictionary returned from detect.py
+        species = det["class_name"]
+        confidence = round(det["conf"], 2)
+
+        formatted_detections.append({
+            "species": species,
+            "confidence": confidence
+        })
+
+        species_counts[species] = species_counts.get(species, 0) + 1
+    
+    #JSON file but with info from detection
     return {
-        "total_fish": 1,
-        "detections": [
-            {
-                "species": "clownfish",
-                "confidence": 0.94
-            }
-        ],
-        "species_counts": {
-            "clownfish": 1
-        }
+        "total_fish": total_fish,
+        "detections": formatted_detections,
+        "species_counts": species_counts
     }
