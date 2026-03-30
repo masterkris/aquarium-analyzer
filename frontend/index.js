@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
 
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.textContent = "Analyzing...";
+
     try {
       const response = await fetch("/analyze", {
         method: "POST",
@@ -19,9 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const data = await response.json();
-      console.log("Analysis result:", data);
+
+      // After getting the response, display it on the page
+      resultsDiv.innerHTML = "";
+      resultsDiv.textContent = JSON.stringify(data);
     } catch (error) {
-      console.error("Upload failed:", error);
+      resultsDiv.textContent = `Upload failed: ${error.message}`;
     }
   });
 });
