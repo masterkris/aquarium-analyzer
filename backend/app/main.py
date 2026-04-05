@@ -6,16 +6,20 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from src.detection.detect import detect_fish
 
-FRONTEND_DIR = FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
+FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 
 app = FastAPI()
-
-app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
 @app.get("/")
 def read_root():
-    return FileResponse(f"{FRONTEND_DIR}/index.html")
+    return FileResponse(FRONTEND_DIR / "index.html", media_type="text/html")
+
+
+@app.get("/favicon.svg")
+def serve_favicon():
+    return FileResponse(FRONTEND_DIR / "favicon.svg", media_type="image/svg+xml")
+
 
 # add routes and schemas later as we progress
 
@@ -75,3 +79,5 @@ async def analyze_image(file: UploadFile = File(...)):
         "detections": formatted_detections,
         "species_counts": species_counts
     }
+
+app.mount("/", StaticFiles(directory=FRONTEND_DIR), name="frontend")
