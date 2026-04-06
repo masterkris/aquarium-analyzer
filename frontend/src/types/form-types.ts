@@ -1,0 +1,14 @@
+export interface IFileUploadForm {
+  selectFile: FileList;
+}
+
+export interface IAnalyzeResponse {
+  total_fish: number;
+  detections: Array<IFormattedDetection>;
+  species_counts: Record<string, number>;
+}
+
+export interface IFormattedDetection {
+  species: string;
+  confidence: number;
+}
