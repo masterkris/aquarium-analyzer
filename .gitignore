@@ -211,6 +211,7 @@ __pycache__/
 .ipynb_checkpoints/
 
 # don't push weights or datasets
+*.pt
 data/*
 !data/.gitkeep
 

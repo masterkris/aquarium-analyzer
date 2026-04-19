@@ -6,5 +6,6 @@ opencv-python
 numpy
 pillow
 ultralytics
+albumentations
 python-multipart
 
