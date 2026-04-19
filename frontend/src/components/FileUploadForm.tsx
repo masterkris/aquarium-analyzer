@@ -20,6 +20,7 @@ function FileUploadForm(): ReactElement {
 
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("tankSize", String(data.tankSize));
 
       try {
         const { data } = await axios.post<IAnalyzeResponse>(
@@ -47,17 +48,33 @@ function FileUploadForm(): ReactElement {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div>
-          <input
-            className="w-full text-sm text-(--text) cursor-pointer
+          <div className="flex flex-row items-center gap-2 mb-2">
+            <label htmlFor="tankSize">Tank size (gallons):</label>
+            <input
+              className="text-sm text-(--text) cursor-pointer
               file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
               file:text-sm file:font-semibold
               file:bg-(--accent-bg) file:text-(--accent)
               hover:file:opacity-80 file:cursor-pointer file:transition-opacity"
-            type="file"
-            id="myFile"
-            accept="image/*"
-            {...register("selectFile")}
-          />
+              type="number"
+              id="tankSize"
+              accept="image/*"
+              {...register("tankSize")}
+            />
+          </div>
+          <div className="flex flex-row items-center gap-2 mb-2">
+            <input
+              className="w-full text-sm text-(--text) cursor-pointer
+              file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+              file:text-sm file:font-semibold
+              file:bg-(--accent-bg) file:text-(--accent)
+              hover:file:opacity-80 file:cursor-pointer file:transition-opacity"
+              type="file"
+              id="myFile"
+              accept="image/*"
+              {...register("selectFile")}
+            />
+          </div>
         </div>
         <button
           type="submit"
@@ -77,9 +94,7 @@ function FileUploadForm(): ReactElement {
               Analyzing your image...
             </p>
           )}
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
           {result && (
             <div className="p-4 rounded-xl border border-(--border) space-y-2">
               <h2 className="text-lg font-semibold text-(--text-h)">
@@ -89,11 +104,13 @@ function FileUploadForm(): ReactElement {
                 Species counts
               </h3>
               <ul className="text-sm text-(--text) space-y-1">
-                {Object.entries(result.species_counts).map(([species, count]) => (
-                  <li key={species}>
-                    {species}: {count}
-                  </li>
-                ))}
+                {Object.entries(result.species_counts).map(
+                  ([species, count]) => (
+                    <li key={species}>
+                      {species}: {count}
+                    </li>
+                  ),
+                )}
               </ul>
               <h3 className="text-sm font-medium text-(--text) uppercase tracking-wide mt-3">
                 Detections

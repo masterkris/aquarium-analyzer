@@ -1,4 +1,5 @@
 export interface IFileUploadForm {
+  tankSize: number;
   selectFile: FileList;
 }
 

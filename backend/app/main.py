@@ -1,7 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from src.detection.detect import detect_fish
@@ -22,9 +22,8 @@ def serve_favicon():
 
 
 # add routes and schemas later as we progress
-
 @app.post("/analyze")
-async def analyze_image(file: UploadFile = File(...)):
+async def analyze_image(file: UploadFile = File(...), tankSize: int = Form(...)):
     #checking if file is supported
     allowed_types = ["image/jpeg", "image/png", "image/jpg"]
     if file.content_type not in allowed_types:
