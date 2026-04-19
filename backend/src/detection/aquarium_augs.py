@@ -37,14 +37,14 @@ def build_aquarium_augmentations() -> A.Compose:
             A.OneOf(
                 [
                     A.ISONoise(intensity=(0.1, 0.5), p=1.0),
-                    A.Downscale(scale_range=(0.5, 0.9), p=0.15),
+                    A.GaussNoise(std_range=(0.04, 0.22), p=1.0),
                 ],
                 p=0.3,
             ),
 
             # --- Compression / resolution (WhatsApp-forwarded tank photos, screenshots) ---
             A.ImageCompression(quality_range=(40, 90), p=0.3),
-            A.Downscale(scale_min=0.5, scale_max=0.9, p=0.15),
+            A.Downscale(scale_range=(0.5, 0.9), p=0.15),
 
             # --- Color / lighting (dim tanks, LED glare, freshwater vs saltwater tint) ---
             A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.4),
