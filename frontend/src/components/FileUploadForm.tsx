@@ -122,6 +122,12 @@ function FileUploadForm(): ReactElement {
                   </li>
                 ))}
               </ul>
+              <h3 className="text-sm font-medium text-(--text) uppercase tracking-wide mt-3">
+                Recommendations
+              </h3>
+              <p className="text-sm text-(--text) whitespace-pre-line">
+                {result.recommendations}
+              </p>
             </div>
           )}
         </section>

@@ -7,4 +7,5 @@ numpy
 pillow
 ultralytics
 python-multipart
-
+python-dotenv
+google-genai

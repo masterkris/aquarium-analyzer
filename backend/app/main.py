@@ -1,10 +1,16 @@
 import os
 import tempfile
 from pathlib import Path
+from dotenv import load_dotenv
 from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from google import genai
 from src.detection.detect import detect_fish
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+API_KEY = os.getenv("API_KEY")
+gemini_client = genai.Client(api_key=API_KEY)
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 
@@ -71,12 +77,32 @@ async def analyze_image(file: UploadFile = File(...), tankSize: int = Form(...))
         })
 
         species_counts[species] = species_counts.get(species, 0) + 1
-    
-    #JSON file but with info from detection
+
+    #get stocking recommendations from Gemini
+    prompt = (
+        f"I have a {tankSize}-gallon freshwater aquarium with the following fish: "
+        f"{', '.join(f'{count} {species}' for species, count in species_counts.items())}. "
+        f"Total fish: {total_fish}. "
+        "Is this tank overstocked, understocked, or appropriately stocked? "
+        "Are there any compatibility issues between these species? "
+        "Provide brief, actionable recommendations."
+    )
+
+    try:
+        gemini_response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=prompt,
+        )
+        recommendations = gemini_response.text
+    except Exception as e:
+        print(f"Gemini API error: {e}")
+        recommendations = "Unable to generate recommendations at this time."
+
     return {
         "total_fish": total_fish,
         "detections": formatted_detections,
-        "species_counts": species_counts
+        "species_counts": species_counts,
+        "recommendations": recommendations,
     }
 
 app.mount("/", StaticFiles(directory=FRONTEND_DIR), name="frontend")
